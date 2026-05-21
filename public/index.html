@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Log Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" type="image/x-icon" href="icon.jpg">
+  <style>
+   :root{
+  --sidebar-w:250px;
+  --bg:#07111f;
+  --panel:rgba(13,23,40,0.82);
+  --panel-strong:rgba(17,28,48,0.92);
+  --panel-border:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.06);
+  --shadow: 0 20px 45px rgba(0,0,0,0.35);
+
+  --text:#dbe7ff;
+
+  --muted:#8ea4c7;
+
+  --heading:#ffffff;
+
+  --accent:
+    linear-gradient(
+      135deg,
+      #4f46e5,
+      #7c3aed
+    );
+
+  --accent-solid:#7c3aed;
+
+  --accent-soft:
+    rgba(124,58,237,0.14);
+
+  --success:#22c55e;
+
+  --danger:#ef4444;
+
+  --warning:#f59e0b;
+
+  --radius-xl:28px;
+
+  --radius-lg:22px;
+
+  --radius-md:16px;
+
+  --radius-sm:12px;
+
+  --max-width:1280px;
+
+}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+   body{
+
+  margin:0;
+letter-spacing:-0.01em;
+-webkit-font-smoothing:antialiased;
+text-rendering:optimizeLegibility;
+  font-family:"Inter",sans-serif;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(79,70,229,0.20),
+      transparent 26%
+    ),
+
+    radial-gradient(
+      circle at top right,
+      rgba(6,182,212,0.12),
+      transparent 30%
+    ),
+
+    linear-gradient(
+      180deg,
+      #07111f 0%,
+      #0b1526 100%
+    );
+
+  color:var(--text);
+
+  min-height:100vh;
+
+}
+
+    /* ─── SIDEBAR ─────────────────────────────────── */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: rgba(6, 13, 31, 0.96);
+      border-right: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1d4ed8, #0891b2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow:
+  0 0 24px rgba(59,130,246,0.28);
+    }
+
+    #downloadPdfBtn svg{
+  transition:0.25s ease;
+}
+
+#downloadPdfBtn:hover svg{
+  transform:
+    translateY(1px);
+
+}
+
+    .brand-icon svg { width: 18px; height: 18px; fill: white; }
+
+    .brand-text { font-size: 0.9rem; font-weight: 800; color: var(--heading); line-height: 1.3; }
+    .brand-ver { font-size: 0.68rem; color: var(--muted); font-weight: 500; margin-top: 2px; }
+
+    .sidebar-nav { padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: 0.88rem; font-weight: 600;
+      color: #94a3b8;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(59, 130, 246, 0.08);
+      border-color: rgba(59, 130, 246, 0.14);
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+    color:#dbeafe;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(59,130,246,0.16),
+      rgba(6,182,212,0.10)
+    );
+
+  border-color:
+    rgba(59,130,246,0.30);
+
+  box-shadow:
+    0 0 18px rgba(59,130,246,0.16);
+    }
+
+    .topbar-title{
+
+  font-size:1.05rem;
+
+  font-weight:700;
+
+  color:var(--heading);
+
+  transition:0.25s ease;
+
+}
+
+.nav-item svg {
+  width:18px;
+  height:18px;
+  flex-shrink:0;
+  stroke-width:2.1;
+  opacity:0.92;
+}
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid var(--panel-border);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .auth-btn {
+      display: block; width: 100%; padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.84rem; font-weight: 700; text-align: center;
+      text-decoration: none; cursor: pointer; border: none;
+      font-family: inherit; transition: all 0.2s ease;
+    }
+
+    .auth-btn.login {
+      background: linear-gradient(135deg, #1d4ed8, #0891b2);
+      color: white;
+      box-shadow: 0 4px 14px rgba(29, 78, 216, 0.3);
+    }
+
+    .auth-btn.signup {
+      background: rgba(255,255,255,0.05);
+      color: #94a3b8;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .auth-btn.logout {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .auth-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* ─── MAIN CONTENT ───────────────────────────── */
+ #main {
+      margin-left: var(--sidebar-w);
+      width: calc(100% - var(--sidebar-w));
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+}
+
+    /* ─── TOPBAR ─────────────────────────────────── */
+    #topbar {
+     height: 54px;
+      background: rgba(6, 13, 31, 0.92);
+      border-bottom: 1px solid var(--panel-border);
+      backdrop-filter: blur(16px);
+      display: flex; align-items: center; justify-content: space-between;
+     padding: 0 20px;
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .topbar-badge {
+      padding: 6px 14px; border-radius: 999px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: #93c5fd; font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    /* ─── PAGE SECTIONS ──────────────────────────── */
+
+      .page{
+
+  display:none;
+
+  opacity:0;
+
+  transform:translateY(10px);
+
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease;
+
+ padding:18px 22px 32px;
+
+}
+
+.page.active{
+
+  display:block;
+
+  opacity:1;
+
+  transform:translateY(0);
+
+  animation:fadePage 0.3s ease;
+
+}
+
+@keyframes fadePage{
+
+  from{
+
+    opacity:0;
+
+    transform:translateY(8px);
+
+  }
+
+  to{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+  }
+
+}
+ 
+
+    /* ─── SECTION HEADER ─────────────────────────── */
+    .sec-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+      padding-bottom:6px;
+border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+
+.sec-head h2{
+
+font-size:1.28rem;
+  font-weight:800;
+  color:#f8fafc;
+  letter-spacing:-0.035em;
+  line-height:1.2;
+}
+
+    .badge {
+      padding: 5px 12px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      font-weight:800;
+letter-spacing:0.08em;
+    }
+
+    .badge-blue {
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #93c5fd;
+    }
+
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.22);
+      color: #67e8f9;
+    }
+
+    .badge-red {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.22);
+      color: #fca5a5;
+    }
+
+    /* ─── GLASS CARD ─────────────────────────────── */
+    .card{
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(11,22,38,0.92),
+      rgba(16,28,48,0.88)
+    );
+
+  border:
+    1px solid rgba(255,255,255,0.05);
+
+  border-radius:24px;
+
+  padding:22px;
+
+  backdrop-filter:blur(18px);
+
+  box-shadow:
+    0 10px 35px rgba(0,0,0,0.22);
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+
+}
+
+.card:hover{
+
+  transform:translateY(-3px);
+
+  border-color:
+    rgba(59,130,246,0.16);
+
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.28);
+
+}
+
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; gap: 12px;
+    }
+
+    .card-head h3 { font-size: 0.95rem; font-weight: 700; color: var(--heading); }
+ .card-head h4{
+
+  font-size:1rem;
+
+  font-weight:750;
+
+  color:#f8fafc;
+
+  letter-spacing:-0.02em;
+
+  line-height:1.35;
+
+}
+    .card-head p { font-size: 0.84rem; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+    /* ─── ANALYSIS CONTROL CENTER ────────────────── */
+    #page-overview .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 16px; align-items: end;
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block; font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.1em; font-weight: 700; color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .segmented {
+      display: flex; padding: 4px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px; gap: 4px;
+    }
+
+    .segmented input { display: none; }
+
+    .segmented label {
+      flex: 1; padding: 10px 16px; border-radius: 8px;
+      font-size: 0.84rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); cursor: pointer;
+      text-align: center; transition: all 0.2s ease;
+    }
+
+    .segmented input:checked + label {
+      background: linear-gradient(135deg, #1d4ed8, #0891b2);
+      color: white;
+      box-shadow: 0 6px 16px rgba(29, 78, 216, 0.35);
+    }
+
+.upload-shell{
+  display:flex;
+  align-items:center;
+  height:52px;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+  overflow:hidden;
+  background:
+    rgba(255,255,255,0.03);
+}
+
+    #logfile { display: none; }
+
+ .upload-name{
+  flex:1;
+  height:100%;
+  display:flex;
+  align-items:center;
+  padding:0 18px;
+  font-size:0.9rem;
+  font-weight:600;
+  color:#94a3b8;
+  letter-spacing:0.03em;
+}
+.browse-btn{
+
+  min-width:120px;
+
+  height:52px;
+
+  padding:20px 22px;
+
+  display:flex;
+
+  align-items:center!important;
+
+  justify-content:center!important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37,99,235,0.85),
+      rgba(14,165,233,0.78)
+    );
+
+  border:none;
+  border-radius:14px;
+  color:#f8fafc!important;
+  font-weight:700;
+  font-size:0.82rem;
+  letter-spacing:0.05em;
+  cursor:pointer;
+  transition:all 0.22s ease;
+  flex-shrink:0;
+}
+
+   .browse-btn:hover{
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(59,130,246,0.95),
+      rgba(6,182,212,0.88)
+    );
+
+}
+
+    .run-btn {
+      width: 100%; min-height: 48px; border: none; border-radius: 10px;
+      background: linear-gradient(135deg, #1d4ed8, #0891b2);
+      color: white; font-weight: 800; font-size: 0.95rem;
+      cursor: pointer; font-family: inherit;
+      box-shadow: 0 8px 20px rgba(29, 78, 216, 0.3);
+      transition: all 0.2s ease; letter-spacing: 0.04em;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    button:active{
+
+  transform:scale(0.98);
+
+}
+.run-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 32px rgba(29, 78, 216, 0.42);
+}
+    .run-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .notes-grid {
+      display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .note-box, .cap-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+     padding: 18px 20px;
+    }
+
+    .note-box h4, .cap-box h4 { font-size: 0.88rem; font-weight: 700; color: var(--heading); margin-bottom: 12px; }
+
+    .note-box ul {
+      list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .note-box ul li {
+      font-size: 0.84rem; color: var(--muted); line-height: 1.7;
+      padding-left: 16px; position: relative;
+    }
+
+    .note-box ul li::before {
+      content: "›"; position: absolute; left: 0; color: var(--accent); font-weight: 700;
+    }
+
+    .cap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .cap-tile {
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px solid rgba(59, 130, 246, 0.12);
+      border-radius: 10px; padding: 14px;
+    }
+
+    .cap-tile span {
+      display: block; font-size: 0.68rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px;
+    }
+
+    .cap-tile strong { font-size: 0.88rem; color: var(--heading); }
+
+    /* Download button */
+    #downloadPdfBtn {
+      width: 100%; min-height: 48px; border: none; border-radius: 10px;
+      background: linear-gradient(135deg, #1e3a5f, #164e63);
+      color: #67e8f9; font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; font-family: inherit;
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      box-shadow: 0 4px 16px rgba(6, 182, 212, 0.12);
+      transition: all 0.2s ease; letter-spacing: 0.04em;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    #downloadPdfBtn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(6, 182, 212, 0.2); }
+
+    /* Status bar */
+    .status-bar {
+      padding: 12px 16px; border-radius: 10px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #6ee7b7; font-weight: 600; font-size: 0.86rem;
+      display: none;
+    }
+
+    .status-bar.show { display: flex; align-items: center; gap: 10px; }
+
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #10b981; flex-shrink: 0;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* ─── TRAFFIC SNAPSHOT ───────────────────────── */
+.kpi-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:16px;
+  margin-top:0;
+  margin-bottom:0;
+  min-width:0;
+}
+
+.kpi-card {
+  min-width:0;
+}
+
+    .kpi-card {
+      background: rgba(10, 22, 40, 0.7);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-xl); padding: 18px 20px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+.kpi-card:hover {
+  transform:translateY(-4px);
+  border-color: rgba(59,130,246,0.20);
+  box-shadow:
+    0 20px 42px rgba(0,0,0,0.30);
+}
+
+    .kpi-card::before {
+      content: ""; position: absolute; inset: 0 0 auto 0;
+      height: 2px; background: linear-gradient(90deg, #1d4ed8, #0891b2);
+    }
+
+    .kpi-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .kpi-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 700; }
+    .kpi-sublabel { font-size: 0.72rem; color: var(--muted); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 999px; }
+
+    .kpi-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+      box-shadow:
+  inset 0 0 18px rgba(255,255,255,0.03),
+  0 6px 18px rgba(0,0,0,0.20);
+
+transition:
+  transform 0.25s ease,
+  box-shadow 0.25s ease;
+    }
+    
+    .kpi-card:hover .kpi-icon{
+  
+  transform:
+    scale(1.08);
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.28);
+
+}
+
+    .kpi-icon svg { width: 18px; height: 18px; }
+    .kpi-icon.blue { background: rgba(29, 78, 216, 0.2); }
+    .kpi-icon.red { background: rgba(239, 68, 68, 0.2); }
+    .kpi-icon.cyan { background: rgba(6, 182, 212, 0.2); }
+    .kpi-icon.amber { background: rgba(245, 158, 11, 0.2); }
+
+    .kpi-val {
+      font-size: 1.65rem; font-weight: 800; color: var(--heading);
+      line-height: 1.1; margin-bottom: 8px;
+    }
+
+    .page{
+  max-width:1500px;
+  min-width:0;
+  overflow-x:hidden;
+}
+
+    .kpi-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.6;line-height:1.7; }
+
+    /* ─── MIDDLE PANELS ───────────────────────────── */
+    .mid-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* Parser summary table */
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table td {
+      padding: 10px 12px; font-size: 0.84rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      line-height:1.6;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+
+    .data-table td:first-child { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .data-table td:last-child { color: var(--heading); font-weight: 700; text-align: right; }
+
+    /* Suspicious list */
+    #suspiciousList {
+      max-height: 220px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 8px;
+      list-style: none; padding: 0;
+    }
+
+    #suspiciousList li {
+      background: rgba(239, 68, 68, 0.06);
+      border: 1px solid rgba(239, 68, 68, 0.14);
+      border-left: 3px solid #ef4444;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;
+      transition: background 0.2s;
+    }
+
+    #suspiciousList li:hover { background: rgba(239, 68, 68, 0.1); }
+
+    #suspiciousList::-webkit-scrollbar { width: 4px; }
+    #suspiciousList::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.3); border-radius: 4px; }
+
+    /* Insights list */
+    #insightsList { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+
+    #insightsList li {
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px solid rgba(59, 130, 246, 0.12);
+      border-left: 3px solid #3b82f6;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.84rem; color: #cbd5e1; line-height: 1.6;
+    }
+
+    /* ─── CHARTS ─────────────────────────────────── */
+    #resultsSection {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .chart-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+      margin-top: 20px;
+      margin-bottom: 14px;
+    }
+
+.chart-card{
+  background: linear-gradient(145deg, rgba(11,22,38,0.94), rgba(16,28,48,0.90));
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius:26px;
+  padding:22px;
+  min-height:340px;
+  display:flex;
+  flex-direction:column;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+  overflow:hidden;
+}
+
+.chart-shell{
+  flex:1;
+  width:100%;
+  min-height:260px;
+  position:relative;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius:22px;
+  padding:14px 16px;
+  overflow:hidden;
+}
+
+.chart-shell canvas {
+  width:100% !important;
+  height:100% !important;
+  display:block;
+}
+
+.chart-shell::before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(59,130,246,0.08),
+      transparent 30%
+    );
+
+  pointer-events:none;
+
+}
+
+    /* ─── TABLE PANELS ───────────────────────────── */
+    .table-responsive {
+      overflow-x: auto;
+      border-radius: var(--radius-lg);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      padding: 12px 14px; text-align: left;
+      font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted); font-weight: 700;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    td {
+      padding: 12px 14px; text-align: left;
+      font-size: 0.86rem; color: var(--text); font-weight: 500;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    tr:last-child td { border-bottom: none; }
+tr:hover td {
+  background:
+    rgba(59,130,246,0.06);
+  transition:0.2s ease;
+}
+
+    #routeTable { table-layout: fixed; width: 100%; }
+    #routeTable th:first-child, #routeTable td:first-child { width: 75%; word-break: break-all; }
+    #routeTable th:last-child, #routeTable td:last-child { width: 25%; text-align: right; font-weight: 700; }
+    #routeTable td:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    #parserSummaryTable td:first-child { font-weight: 700; color: var(--heading); width: 48%; }
+    #parserSummaryTable td:last-child { color: var(--muted); }
+
+    /* ─── THREATS ────────────────────────────────── */
+.threat-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(auto-fill,minmax(340px,1fr));
+
+  gap:22px;
+
+  align-items:start;
+
+}
+
+ .threat-card{
+
+  position:relative;
+
+  overflow:hidden;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(12,22,38,0.96),
+      rgba(17,28,48,0.94)
+    );
+
+  border:
+    1px solid rgba(239,68,68,0.12);
+
+  border-radius:26px;
+
+  padding:24px;
+
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+
+  box-shadow:
+    0 18px 45px rgba(0,0,0,0.28);
+
+}
+
+.threat-card::before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0 0 auto 0;
+
+  height:3px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #ef4444,
+      #7c3aed
+    );
+
+}
+
+.threat-card:hover{
+
+  transform:
+    translateY(-5px);
+
+  border-color:
+    rgba(239,68,68,0.22);
+
+  box-shadow:
+    0 25px 55px rgba(0,0,0,0.36);
+
+}
+
+    .threat-top {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+
+  .threat-type{
+
+  font-size:1.05rem;
+
+  font-weight:800;
+
+  color:#f8fafc;
+
+  letter-spacing:-0.02em;
+
+}
+
+    .severity {
+      padding: 5px 12px; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      backdrop-filter:blur(10px);
+    }
+
+.low{
+
+  background:
+    rgba(59,130,246,0.14);
+
+  color:#93c5fd;
+
+  border:
+    1px solid rgba(59,130,246,0.22);
+
+}
+
+.medium{
+
+  background:
+    rgba(245,158,11,0.14);
+
+  color:#fcd34d;
+
+  border:
+    1px solid rgba(245,158,11,0.22);
+
+}
+
+.high{
+
+  background:
+    rgba(249,115,22,0.14);
+
+  color:#fdba74;
+
+  border:
+    1px solid rgba(249,115,22,0.22);
+
+}
+.chart-card:hover{
+
+  transform:translateY(-3px);
+
+}
+.critical{
+
+  animation:
+    pulseAlert 2s infinite;
+
+}
+
+@keyframes pulseAlert{
+  0%{
+
+    box-shadow:
+      0 0 0 rgba(239,68,68,0.18);
+
+  }
+  50%{
+
+    box-shadow:
+      0 0 18px rgba(239,68,68,0.28);
+
+  }
+  100%{
+
+    box-shadow:
+      0 0 0 rgba(239,68,68,0.18);
+
+  }
+}
+
+    .threat-body { display: grid; gap: 12px; }
+
+    .threat-item span {
+      display: block; color: var(--muted);
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .threat-item strong { font-size: 0.9rem; color: var(--text); line-height: 1.5; }
+
+    .empty-threat {
+      grid-column: 1/-1; padding: 40px; text-align: center;
+      border: 1px dashed rgba(255,255,255,0.08); border-radius: var(--radius-xl);
+      color: var(--muted); font-size: 0.9rem;
+    }
+
+    /* ─── HISTORY ────────────────────────────────── */
+    .clear-history-btn {
+      padding: 8px 16px; border-radius: 8px; border: none;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fca5a5; font-weight: 700; font-size: 0.82rem;
+      cursor: pointer; font-family: inherit;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .clear-history-btn:hover { background: rgba(239, 68, 68, 0.2); transform: translateY(-1px); }
+
+    .delete-history-btn {
+      width: 34px; height: 34px; border: none;
+      border-radius: 8px; cursor: pointer;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease; color: #fca5a5;
+    }
+
+    .delete-history-btn:hover { background: rgba(239, 68, 68, 0.2); transform: scale(1.08); }
+
+    .delete-history-btn svg { width: 15px; height: 15px; }
+
+    /* ─── ROUTE/METHOD PAGE ──────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ─── LOADING ────────────────────────────────── */
+    .loading { opacity: 0.6; pointer-events: none; }
+
+    /* ─── RESPONSIVE ─────────────────────────────── */
+    @media (max-width: 1200px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+     .mid-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(auto-fit,minmax(320px,1fr));
+
+  gap:20px;
+
+  margin-bottom:24px;
+
+}
+      .mid-grid .card:last-child { grid-column: 1/-1; }
+    }
+
+  @media (max-width: 960px) {
+
+  :root{
+    --sidebar-w:72px;
+  }
+
+  .nav-item span,
+  .brand-text,
+  .brand-ver{
+    display:none;
+  }
+
+  .nav-item{
+    justify-content:center;
+    padding:12px;
+  }
+
+  .sidebar-brand{
+    justify-content:center;
+    padding:20px 0;
+  }
+
+  .sidebar-footer{
+    padding:12px 6px;
+  }
+
+  .control-grid,
+  .notes-grid,
+  .two-col,
+  .mid-grid,
+  .chart-row{
+    grid-template-columns:1fr;
+    align-items:end;}
+
+
+}
+    @media (max-width: 720px) {
+      #main { margin-left: 0; }
+      #sidebar { display: none; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .page { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─────────── SIDEBAR ─────────── -->
+<nav id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    </div>
+    <div>
+      <div class="brand-text">Web Log Analyzer</div>
+      <div class="brand-ver">v1.0.0</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-item active" data-page="page-overview" onclick="showPage('page-overview', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Overview Dashboard</span>
+    </div>
+
+    <div class="nav-item" data-page="page-threats" onclick="showPage('page-threats', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Threat Investigation</span>
+    </div>
+
+    <div class="nav-item" data-page="page-routes" onclick="showPage('page-routes', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Route &amp; Method Breakdown</span>
+    </div>
+
+    <div class="nav-item" data-page="page-history" onclick="showPage('page-history', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>History</span>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <a href="http://localhost:8080/pages/signup.html" class="auth-btn signup">Signup</a>
+    <a href="http://localhost:8080/pages/login.html" class="auth-btn login">Login</a>
+    <a href="http://localhost:8080/pages/login.html" class="auth-btn logout">Logout</a>
+  </div>
+</nav>
+
+<!-- ─────────── MAIN ─────────── -->
+<div id="main">
+
+  <div id="topbar">
+    <div class="topbar-title" id="topbarTitle">Overview Dashboard</div>
+    <div class="topbar-badge">Analysis Engine</div>
+  </div>
+
+  <!-- ══════════════ OVERVIEW PAGE ══════════════ -->
+  <div class="page active" id="page-overview">
+
+    <!-- Analysis Control Center -->
+    <div class="sec-head">
+      <div>
+        <h2>Analysis Control Center</h2>
+      </div>
+      <div class="badge badge-blue">Execution Panel</div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <form id="uploadform">
+        <div class="control-grid" style="display:grid; grid-template-columns:200px 1fr 200px; gap:14px; align-items:end; margin-bottom:14px;">
+
+          <div class="field">
+            <label>Log Mode</label>
+            <div class="segmented">
+              <input type="radio" name="logFormat" id="simpleMode" value="simple" checked>
+              <label for="simpleMode">Simple</label>
+              <input type="radio" name="logFormat" id="apacheMode" value="apache">
+              <label for="apacheMode">Apache</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Input Source</label>
+            <div class="upload-shell">
+              <div class="upload-name" id="fileNameDisplay">No file selected</div>
+              <label class="browse-btn" for="logfile">Browse</label>
+            </div>
+            <input type="file" id="logfile" name="logfile" accept=".log,.txt" required>
+          </div>
+
+          <div class="field">
+            <label>Run Engine</label>
+            <button type="submit" class="run-btn" id="runBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run Analysis
+            </button>
+          </div>
+
+        </div>
+
+        <div class="notes-grid">
+          <div class="note-box">
+            <h4>Parsing Notes</h4>
+            <ul>
+              <li>Apache mode reads quoted request blocks and extracts response codes after the request segment.</li>
+              <li>Simple mode expects structured entries with IP, method, route, and status fields.</li>
+              <li>Current analysis surfaces request distribution, route load, method spread, response signatures, and source concentration.</li>
+            </ul>
+          </div>
+          <div class="cap-box">
+            <h4>Parser Capabilities</h4>
+            <div class="cap-grid">
+              <div class="cap-tile"><span>Request Layer</span><strong>Method + Route</strong></div>
+              <div class="cap-tile"><span>Response Layer</span><strong>Status Signature</strong></div>
+              <div class="cap-tile"><span>Source Layer</span><strong>Client Origin</strong></div>
+              <div class="cap-tile"><span>Traffic Layer</span><strong>Volume &amp; Frequency</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <button id="downloadPdfBtn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Investigation Report
+        </button>
+
+        <div id="statusBar" class="status-bar">
+          <div class="status-dot"></div>
+          <span id="statusText"></span>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Traffic Snapshot -->
+    <div class="sec-head" style="margin-top:8px;">
+      <h2>Traffic Snapshot</h2>
+      <div class="badge badge-cyan">Operational Summary</div>
+
+</div>
+    <div id="resultsSection">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-label">Request Volume</div>
+          <div class="kpi-sublabel">Traffic Load</div>
+        </div>
+        <div class="kpi-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="kpi-val" id="totalRequests">0</div>
+        <div class="kpi-desc">Total inbound requests parsed from the uploaded traffic sample.</div>
+      </div>
+
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-label">Failure Count</div>
+          <div class="kpi-sublabel">4xx / 5xx</div>
+        </div>
+        <div class="kpi-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div class="kpi-val" id="errorCount">0</div>
+        <div class="kpi-desc">Combined client-side and server-side failure responses detected.</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-label">Hot Path</div>
+          <div class="kpi-sublabel">Endpoint</div>
+        </div>
+        <div class="kpi-icon cyan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        </div>
+        <div class="kpi-val" style="font-size:1.3rem;" id="MostRequestedRoute">-</div>
+        <div class="kpi-desc">Highest-frequency endpoint observed in the current request surface.</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-label">Top Source</div>
+          <div class="kpi-sublabel">Client IP</div>
+        </div>
+        <div class="kpi-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        </div>
+        <div class="kpi-val" style="font-size:1.3rem;" id="mostActiveIP">-</div>
+        <div class="kpi-desc">Most active request origin across the analyzed traffic entries.</div>
+      </div>
+  
+    </div>
+
+
+    <!-- Mid Panels -->
+    <div class="mid-grid">
+      <div class="card">
+        <div class="card-head">
+          <h4>Parser Summary / File Health</h4>
+          <div class="badge badge-blue">Input Integrity</div>
+        </div>
+        <div class="table-responsive">
+          <table id="parserSummaryTable">
+            <tbody>
+              <tr><td colspan="2" style="text-align:center;color:var(--muted);">No file processed yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h4>Suspicious Activity Detection</h4>
+          <div class="badge badge-red">Anomaly Watch</div>
+        </div>
+        <ul id="suspiciousList">
+          <li style="border-color:rgba(255,255,255,0.06); color:var(--muted);">No suspicious behavior analyzed yet.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h4>Insights Summary Panel</h4>
+          <div class="badge badge-cyan">Observations</div>
+        </div>
+        <ul id="insightsList">
+          <li style="border-color:rgba(255,255,255,0.06); color:var(--muted);">No insights generated yet.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="sec-head">
+      <h2>Behavioral Analysis</h2>
+      <div class="badge badge-blue">Distribution &amp; Frequency</div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="card-head">
+          <h4>Status Distribution</h4>
+          <div class="badge badge-cyan">Response Signature</div>
+        </div>
+        <div class="chart-shell">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="card-head">
+          <h4>Route Frequency</h4>
+          <div class="badge badge-blue">Endpoint Load</div>
+        </div>
+        <div class="chart-shell">
+          <canvas id="routeChart"></canvas>
+        </div>
+      </div>
+
+    </div><!-- /chart-row -->
+
+  </div><!-- /resultsSection -->
+
+  </div><!-- /page-overview -->
+
+  <!-- ══════════════ THREATS PAGE ══════════════ -->
+  <div class="page" id="page-threats">
+    <div class="sec-head">
+      <h2>Threat Investigation Center</h2>
+      <div class="badge badge-red">Security Intelligence</div>
+    </div>
+
+    <div id="threatContainer" class="threat-grid">
+      <div class="empty-threat">No threats analyzed yet. Run an analysis from the Overview Dashboard.</div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ ROUTES PAGE ══════════════ -->
+  <div class="page" id="page-routes">
+    <div class="sec-head">
+      <h2>Route &amp; Method Breakdown</h2>
+      <div class="badge badge-cyan">Path Frequency</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head">
+          <h4>Route Breakdown</h4>
+          <div class="badge badge-blue">Path Frequency</div>
+        </div>
+        <div class="table-responsive">
+          <table id="routeTable">
+            <thead><tr><th>Route</th><th>Requests</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h4>Method Breakdown</h4>
+          <div class="badge badge-cyan">Request Method</div>
+        </div>
+        <div class="table-responsive">
+          <table id="methodTable">
+            <thead><tr><th>Method</th><th>Count</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ HISTORY PAGE ══════════════ -->
+  <div class="page" id="page-history">
+    <div class="sec-head">
+      <h2>Recent Analysis History</h2>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="clear-history-btn" onclick="clearHistory()">Clear All</button>
+        <div class="badge badge-blue">Stored Sessions</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>Log Type</th>
+              <th>Total Requests</th>
+              <th>Error Count</th>
+              <th>Top Route</th>
+              <th>Upload Date</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="7" style="text-align:center; color:var(--muted);">No history available yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
