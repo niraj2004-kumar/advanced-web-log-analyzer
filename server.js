@@ -28,9 +28,8 @@ app.use(logRoutes);
 
 // TEST ROUTE
 app.get("/", (req, res) => {
-    res.send("Server is running");
+    res.sendFile(__dirname + "/public/login.html");
 });
-
 
 // SERVER
 app.listen(port, () => {
