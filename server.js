@@ -28,7 +28,7 @@ app.use(logRoutes);
 
 // TEST ROUTE
 app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/public/login.html");
+    res.sendFile(__dirname + "/public/pages/login.html");
 });
 
 // SERVER
